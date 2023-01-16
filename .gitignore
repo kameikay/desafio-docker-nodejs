@@ -1,0 +1,4 @@
+mysql/
+
+# dependencies
+node_modules/

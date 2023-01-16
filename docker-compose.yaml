@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  node:
+    container_name: node
+    build: 
+      context: ./node
+    networks:
+      - desafio-docker-fullcycle
+    volumes:
+      - ./node:/usr/src/app
+    tty: true
+  db:
+    image: mysql:5.7
+    command: --innodb-use-native-aio=0
+    platform: linux/x86_64
+    container_name: db
+    restart: always
+    tty: true
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=nodedb
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - "3306:3306"
+    networks:
+      - desafio-docker-fullcycle
+  nginx:
+    container_name: nginx
+    build:
+      context: ./nginx
+    networks:
+      - desafio-docker-fullcycle
+    ports:
+      - "8000:80"
+      
+networks:
+  desafio-docker-fullcycle:
+    driver: bridge
