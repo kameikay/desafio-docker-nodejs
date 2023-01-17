@@ -10,15 +10,21 @@ services:
     volumes:
       - ./node:/usr/src/app
     tty: true
+    depends_on:
+      - db
+    entrypoint: dockerize -wait tcp://db:3306 -timeout 40s docker-entrypoint.sh
+    command: sh -c "npm install && node index.js"
   db:
     image: mysql:5.7
-    command: --innodb-use-native-aio=0
     platform: linux/x86_64
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    volumes:
+      - ./mysql/create_people_table.sql:/docker-entrypoint-initdb.d/create_people_table.sql
     container_name: db
     restart: always
     tty: true
-    volumes:
-      - ./mysql:/var/lib/mysql
     environment:
       - MYSQL_DATABASE=nodedb
       - MYSQL_ROOT_PASSWORD=root
@@ -26,6 +32,7 @@ services:
       - "3306:3306"
     networks:
       - desafio-docker-fullcycle
+    command: --innodb-use-native-aio=0
   nginx:
     container_name: nginx
     build:
@@ -34,6 +41,9 @@ services:
       - desafio-docker-fullcycle
     ports:
       - "8000:80"
+    depends_on:
+      - node
+      - db
       
 networks:
   desafio-docker-fullcycle:
